@@ -81,10 +81,15 @@ function renderNameStep() {
         <input
           class="text-input"
           id="name-input"
+          name="quiz_name"
           type="text"
           placeholder="${nameStep.placeholder}"
           value="${escapeHtml(state.name)}"
-          autocomplete="name"
+          autocomplete="off"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          inputmode="text"
         />
       </div>
       <button class="primary-button" id="name-next-button" type="button">${nameStep.button}</button>
