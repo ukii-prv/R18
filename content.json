@@ -1,0 +1,143 @@
+{
+  "labels": {
+    "questionPrefix": "Frage",
+    "backButton": "← Zurück",
+    "restartButton": "← Zurück zum Start"
+  },
+  "welcome": {
+    "eyebrow": "Sehr Sehr Sehr Sehr (Sehr!) Wichtiger Test",
+    "title": "Passen wir gut zusammen? 💌",
+    "body": "Beantworte diese 10 Fragen und finde heraus, ob wir gut zusammenpassen. Beantworte sie so ehrlich wie möglich und mit Bedacht!",
+    "button": "Ich bin bereit, GIB MIR DIE FRAGEN!"
+  },
+  "nameStep": {
+    "eyebrow": "JETZT ABER ACHTUNG",
+    "title": "Wie heißt du?",
+    "body": "Ich hoffe mal du bist Riana!",
+    "placeholder": "Dein Name",
+    "button": "Weiter, ICH WILL RICHTIGE FRAGEN SEHEN!"
+  },
+  "questions": [
+    {
+      "prompt": "Wie alt bist du jetzt? 🎂",
+      "helper": "Nur damit du es dir besser merken kannst",
+      "options": [
+        "Ich bin 17 (Das ist übrigens falsch, ACHTUNG!!)",
+        "Ich bin 18",
+        "Ich bin 19 (Wär mir neu)",
+        "Ich bin jünger als 17 (riana??)",
+        "Ich bin älter als 19 (…)"
+      ]
+    },
+    {
+      "prompt": "Welches Getränk cravest du grad am meisten? 🥤",
+      "helper": "Ich glaub ich weiß es schon 😝",
+      "options": [
+        "Iced Coffee",
+        "Normaler Kaffee",
+        "Iced Matcha",
+        "Anderer Tee",
+        "Wasser Bruder, einfach Wasser",
+        "Cola (Zero natürlich)"
+      ]
+    },
+    {
+      "prompt": "Wer ist die die perfekte Partnerin für Joel Dankert 💓",
+      "helper": "Also ich bin für Riana",
+      "options": [
+        "Riana Binișan",
+        "infinity" 
+      ]
+    },
+    {
+      "prompt": "Was ist dein Lieblingsvideospiel 🎮",
+      "helper": "Du hast die Wahl…",
+      "options": [
+        "R.E.P.O.",
+        "Stardew Valley",
+        "3D World",
+        "Animal Crossing",
+        "Portal",
+        "Portal 2",
+        "Phasmophobia",
+        "Zoo Spiel"
+      ]
+    },
+    {
+      "prompt": "Was sind deine Lieblingsblumen? 💐",
+      "helper": "Das weiß ich definitiv noch nicht",
+      "options": [
+        "Rote und pinke Blumen, am besten mit Schleierkraut",
+        "KNALLGRÜNE BLUMEN (gibts sowas??)",
+        "Rote Rosen",
+        "Bunte Tulpen",
+        "Ich bin nicht 18!"
+      ]
+    },
+    {
+      "prompt": "Schokolade oder Schokolade?",
+      "helper": "Schoki?",
+      "options": [
+        "Schokolade. 🍫",
+        "infinity"
+      ]
+    },
+    {
+      "prompt": "Welches Lied würdest du jetzt gerade in die Warteschlange machen? 🎶",
+      "helper": "Ein paar Banger deiner Lieblingskünstler stehen zur Wahl",
+      "options": [
+        "Let Down – Radiohead",
+        "Earrings – Malcolm Todd",
+        "Stupid Boy – The Neighbourhood",
+        "Clocks – Coldplay",
+        "Let It Happen – Tame Impala",
+        "Egg – Djo",
+        "R U Mine? – Arctic Monkeys",
+        "Les – Childish Gambino",
+        "White Keys – Dominic Fike"
+      ]
+    },
+    {
+      "prompt": "Du darfst noch ein zweites wählen 😜",
+      "helper": "Ich weiß du kannst dich schwer entscheiden",
+      "options": [
+        "Let Down – Radiohead",
+        "Earrings – Malcolm Todd",
+        "Stupid Boy – The Neighbourhood",
+        "Clocks – Coldplay",
+        "Let It Happen – Tame Impala",
+        "Egg – Djo",
+        "R U Mine? – Arctic Monkeys",
+        "Les – Childish Gambino",
+        "White Keys – Dominic Fike"
+      ]
+    },
+    {
+      "prompt": "Winter oder Sommer?",
+      "helper": "Die Frage kann doch nicht so schwer sein, oder?",
+      "options": [
+        "Sommer ☀️",
+        "Winter ❄️",
+        "Hä bro Herbst?? 🍂",
+        "Neee Frühling! 🌷",
+        "Ich mag alles irgendwie"
+      ]
+    },
+    {
+      "prompt": "Wer ist dein Crush? 😳",
+      "helper": "Letzte Frage, hier musst du aufpassen",
+      "options": [
+        "Joel Dankert",
+        "infinity"
+      ]
+    }
+  ],
+  "result": {
+    "eyebrow": "Ergebnis",
+    "title": "Das Match-Ergebnis wurde berechnet",
+    "intro": "Da stecken Quantencomputer dahinter, der Score ist mit absoluter Sicherheit korrekt!",
+    "button": "Ich bin SOOO aufgeregt, SCORE ANZEIGEN!",
+    "scoreLabel": "Match-Level",
+    "body": "Wow, wir sind füreinander bestimmt! (auch wenn du 18 bist)"
+  }
+}
