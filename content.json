@@ -137,6 +137,15 @@
     "title": "Das Match-Ergebnis wurde berechnet",
     "intro": "Da stecken Quantencomputer dahinter, der Score ist mit absoluter Sicherheit korrekt!",
     "button": "Ich bin SOOO aufgeregt, SCORE ANZEIGEN!",
+    "celebrateButtons": [
+      "Jetzt gib mir Blumen!",
+      "Ich will mehr!",
+      "Da geht noch was!",
+      "Mehr Blumen!",
+      "Blumenpower bitte!",
+      "Hallo wieso nur so wenig?",
+      "Geht da nicht mehr?"
+    ],
     "scoreLabel": "Match-Level",
     "body": "Wow, wir sind füreinander bestimmt! (auch wenn du 18 bist)"
   }
