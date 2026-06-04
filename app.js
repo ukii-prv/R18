@@ -9,7 +9,14 @@ const state = {
   revealed: false,
   transitioning: false,
   infiniteScrollHandler: null,
+  revealFollowupTimeout: null,
+  flowerStreamInterval: null,
+  flowerStreamIntensity: 0,
+  celebratePressCount: 0,
+  flowerSizeBoost: 0,
 };
+
+const FLOWER_EMOJIS = ["🌸", "🌷", "🌹", "💐", "🌺", "🌻", "🌼", "🪻", "🪷"];
 
 function render() {
   if (!state.content) {
@@ -40,6 +47,7 @@ function render() {
 }
 
 function renderWelcome() {
+  clearResultEffects();
   const { welcome } = state.content;
 
   app.innerHTML = `
@@ -65,6 +73,7 @@ function renderWelcome() {
 }
 
 function renderNameStep() {
+  clearResultEffects();
   const { nameStep, labels } = state.content;
 
   app.innerHTML = `
@@ -128,6 +137,7 @@ function renderNameStep() {
 }
 
 function renderQuestion() {
+  clearResultEffects();
   const question = state.content.questions[state.questionIndex];
   const total = state.content.questions.length;
   const optionConfig = getOptionConfig(question.options);
@@ -316,17 +326,22 @@ function renderResult() {
         </div>
         <p class="score-label">${result.scoreLabel}</p>
         <p class="result-copy hidden" id="result-body">${result.body}</p>
+        <button class="primary-button celebrate-button" id="celebrate-button" type="button">${getCelebrateButtonText(0)}</button>
         <button class="primary-button" id="reveal-button">${result.button}</button>
       </div>
+      <div class="flower-stream" id="flower-stream" aria-hidden="true"></div>
     </section>
   `;
 
   const button = document.getElementById("reveal-button");
+  const celebrateButton = document.getElementById("celebrate-button");
   const restartButton = document.getElementById("restart-button");
   const scoreProgress = document.getElementById("score-progress");
   scoreProgress.style.strokeDasharray = `${circumference}`;
   scoreProgress.style.strokeDashoffset = `${circumference}`;
   restartButton.addEventListener("click", resetToWelcome);
+  setCelebrateButtonVisible(false);
+  celebrateButton.addEventListener("click", handleCelebrateButtonClick);
   button.addEventListener("click", revealScore, { once: true });
 }
 
@@ -348,6 +363,7 @@ function revealScore() {
   const scoreProgress = document.getElementById("score-progress");
   const resultBody = document.getElementById("result-body");
   const revealButton = document.getElementById("reveal-button");
+  const celebrateButton = document.getElementById("celebrate-button");
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
 
@@ -376,9 +392,33 @@ function revealScore() {
 
     scoreScene.classList.add("score-scene-finishing");
     resultBody.classList.remove("hidden");
+    celebrateButton.textContent = getCelebrateButtonText(state.celebratePressCount);
+    scheduleCelebrateButton(1000);
   }
 
   requestAnimationFrame(tick);
+}
+
+function handleCelebrateButtonClick() {
+  const celebrateButton = document.getElementById("celebrate-button");
+  if (!celebrateButton || !celebrateButton.classList.contains("celebrate-button-visible")) {
+    return;
+  }
+
+  state.celebratePressCount += 1;
+  state.flowerStreamIntensity = Math.min(10, state.flowerStreamIntensity + 1.1);
+  state.flowerSizeBoost = Math.min(2.4, state.flowerSizeBoost + 0.28);
+  startFlowerStream();
+  setCelebrateButtonVisible(false);
+  window.setTimeout(() => {
+    const nextCelebrateButton = document.getElementById("celebrate-button");
+    if (!nextCelebrateButton) {
+      return;
+    }
+
+    nextCelebrateButton.textContent = getCelebrateButtonText(state.celebratePressCount);
+  }, 500);
+  scheduleCelebrateButton(1000);
 }
 
 function scoreCurve(progress) {
@@ -435,6 +475,58 @@ function particleRandom(seed) {
     value = (value * 48271) % 2147483647;
     return value / 2147483647;
   };
+}
+
+function startFlowerStream() {
+  const flowerStream = document.getElementById("flower-stream");
+  if (!flowerStream) {
+    return;
+  }
+
+  flowerStream.classList.add("flower-stream-active");
+
+  const spawnFlower = () => {
+    const random = particleRandom(Date.now() + flowerStream.childElementCount + Math.floor(Math.random() * 9999));
+    const emoji = FLOWER_EMOJIS[Math.floor(random() * FLOWER_EMOJIS.length)];
+    const left = (random() * 100).toFixed(2);
+    const drift = (-36 + random() * 72).toFixed(2);
+    const rotate = (-22 + random() * 44).toFixed(2);
+    const baseSize = 1.6 + random() * 1.1;
+    const grownSize = baseSize + state.flowerSizeBoost + state.celebratePressCount * 0.04;
+    const size = grownSize.toFixed(2);
+    const duration = Math.round(3600 + random() * 2400);
+    const delay = Math.round(random() * 120);
+    const flower = document.createElement("span");
+
+    flower.className = "flower-emoji";
+    flower.textContent = emoji;
+    flower.style.setProperty("--left", `${left}%`);
+    flower.style.setProperty("--drift", `${drift}px`);
+    flower.style.setProperty("--rotate", `${rotate}deg`);
+    flower.style.setProperty("--size", `${size}rem`);
+    flower.style.setProperty("--duration", `${duration}ms`);
+    flower.style.setProperty("--delay", `${delay}ms`);
+    flower.addEventListener("animationend", () => {
+      flower.remove();
+    });
+    flowerStream.appendChild(flower);
+  };
+
+  const burstCount = Math.max(2, Math.round(state.flowerStreamIntensity) + 1);
+  for (let index = 0; index < burstCount; index += 1) {
+    spawnFlower();
+  }
+
+  if (state.flowerStreamInterval) {
+    return;
+  }
+
+  state.flowerStreamInterval = window.setInterval(() => {
+    const perTick = Math.max(1, Math.round(state.flowerStreamIntensity));
+    for (let index = 0; index < perTick; index += 1) {
+      spawnFlower();
+    }
+  }, 180);
 }
 
 function transitionScreen(updateState, options = {}) {
@@ -499,6 +591,56 @@ function escapeHtml(value) {
     .replaceAll("\"", "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+function clearResultEffects() {
+  if (state.revealFollowupTimeout) {
+    window.clearTimeout(state.revealFollowupTimeout);
+    state.revealFollowupTimeout = null;
+  }
+
+  if (state.flowerStreamInterval) {
+    window.clearInterval(state.flowerStreamInterval);
+    state.flowerStreamInterval = null;
+  }
+
+  state.flowerStreamIntensity = 0;
+  state.celebratePressCount = 0;
+  state.flowerSizeBoost = 0;
+}
+
+function scheduleCelebrateButton(delay) {
+  if (state.revealFollowupTimeout) {
+    window.clearTimeout(state.revealFollowupTimeout);
+  }
+
+  state.revealFollowupTimeout = window.setTimeout(() => {
+    setCelebrateButtonVisible(true);
+    state.revealFollowupTimeout = null;
+  }, delay);
+}
+
+function setCelebrateButtonVisible(isVisible) {
+  const celebrateButton = document.getElementById("celebrate-button");
+  if (!celebrateButton) {
+    return;
+  }
+
+  celebrateButton.classList.toggle("celebrate-button-visible", isVisible);
+}
+
+function getCelebrateButtonText(index) {
+  const result = state.content?.result ?? {};
+  const texts = Array.isArray(result.celebrateButtons) && result.celebrateButtons.length > 0
+    ? result.celebrateButtons
+    : [result.celebrateButton || "Jetzt gib mir Blumen!"];
+
+  if (texts.length === 1 || index <= 0) {
+    return texts[0];
+  }
+
+  const pool = texts.slice(1);
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 async function init() {
