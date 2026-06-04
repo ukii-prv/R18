@@ -306,6 +306,39 @@ button {
   color: var(--ink-soft);
 }
 
+.celebrate-button {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+
+.celebrate-button-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.flower-stream {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.flower-emoji {
+  position: absolute;
+  left: var(--left);
+  bottom: -10vh;
+  font-size: var(--size);
+  line-height: 1;
+  opacity: 0;
+  transform: translateX(0) translateY(0) rotate(0deg);
+  will-change: transform, opacity;
+  animation: flower-rise var(--duration) linear var(--delay) forwards;
+}
+
 .hidden {
   display: none;
 }
@@ -345,6 +378,30 @@ button {
   100% {
     opacity: 0;
     transform: translate(calc(var(--x) * var(--end)), calc(var(--y) * var(--end))) scale(1);
+  }
+}
+
+@keyframes flower-rise {
+  0% {
+    opacity: 0;
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  12% {
+    opacity: 0.95;
+  }
+
+  52% {
+    opacity: 0.88;
+  }
+
+  78% {
+    opacity: 0.62;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(var(--drift)) translateY(-118vh) rotate(var(--rotate));
   }
 }
 
