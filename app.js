@@ -13,6 +13,7 @@ const state = {
   flowerStreamIntensity: 0,
   celebratePressCount: 0,
   flowerSizeBoost: 0,
+  lastCelebrateText: "",
   flowerSystem: null,
   flowerResizeHandler: null,
 };
@@ -407,8 +408,11 @@ function handleCelebrateButtonClick() {
   }
 
   state.celebratePressCount += 1;
-  state.flowerStreamIntensity = Math.min(10, state.flowerStreamIntensity + 1.1);
-  state.flowerSizeBoost = Math.min(3.2, state.flowerSizeBoost + 0.42);
+  if (state.celebratePressCount <= 10) {
+    state.flowerStreamIntensity = Math.min(10, state.flowerStreamIntensity + 1.1);
+  }
+
+  state.flowerSizeBoost = Math.min(5.4, state.flowerSizeBoost + 0.42);
   startFlowerStream();
   setCelebrateButtonVisible(false);
   window.setTimeout(() => {
@@ -733,6 +737,7 @@ function clearResultEffects() {
   state.flowerStreamIntensity = 0;
   state.celebratePressCount = 0;
   state.flowerSizeBoost = 0;
+  state.lastCelebrateText = "";
 }
 
 function scheduleCelebrateButton(delay) {
@@ -762,11 +767,16 @@ function getCelebrateButtonText(index) {
     : [result.celebrateButton || "Jetzt gib mir Blumen!"];
 
   if (texts.length === 1 || index <= 0) {
+    state.lastCelebrateText = texts[0];
     return texts[0];
   }
 
   const pool = texts.slice(1);
-  return pool[Math.floor(Math.random() * pool.length)];
+  const candidates = pool.filter((text) => text !== state.lastCelebrateText);
+  const selectionPool = candidates.length > 0 ? candidates : pool;
+  const nextText = selectionPool[Math.floor(Math.random() * selectionPool.length)];
+  state.lastCelebrateText = nextText;
+  return nextText;
 }
 
 async function init() {
