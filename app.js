@@ -10,10 +10,11 @@ const state = {
   transitioning: false,
   infiniteScrollHandler: null,
   revealFollowupTimeout: null,
-  flowerStreamInterval: null,
   flowerStreamIntensity: 0,
   celebratePressCount: 0,
   flowerSizeBoost: 0,
+  flowerSystem: null,
+  flowerResizeHandler: null,
 };
 
 const FLOWER_EMOJIS = ["🌸", "🌷", "🌹", "💐", "🌺", "🌻", "🌼", "🪻", "🪷"];
@@ -329,7 +330,7 @@ function renderResult() {
         <button class="primary-button celebrate-button" id="celebrate-button" type="button">${getCelebrateButtonText(0)}</button>
         <button class="primary-button" id="reveal-button">${result.button}</button>
       </div>
-      <div class="flower-stream" id="flower-stream" aria-hidden="true"></div>
+      <canvas class="flower-stream" id="flower-stream" aria-hidden="true"></canvas>
     </section>
   `;
 
@@ -407,7 +408,7 @@ function handleCelebrateButtonClick() {
 
   state.celebratePressCount += 1;
   state.flowerStreamIntensity = Math.min(10, state.flowerStreamIntensity + 1.1);
-  state.flowerSizeBoost = Math.min(2.4, state.flowerSizeBoost + 0.28);
+  state.flowerSizeBoost = Math.min(3.2, state.flowerSizeBoost + 0.42);
   startFlowerStream();
   setCelebrateButtonVisible(false);
   window.setTimeout(() => {
@@ -478,55 +479,175 @@ function particleRandom(seed) {
 }
 
 function startFlowerStream() {
-  const flowerStream = document.getElementById("flower-stream");
-  if (!flowerStream) {
+  const canvas = document.getElementById("flower-stream");
+  if (!(canvas instanceof HTMLCanvasElement)) {
     return;
   }
 
-  flowerStream.classList.add("flower-stream-active");
+  canvas.classList.add("flower-stream-active");
+  ensureFlowerSystem(canvas);
 
-  const spawnFlower = () => {
-    const random = particleRandom(Date.now() + flowerStream.childElementCount + Math.floor(Math.random() * 9999));
-    const emoji = FLOWER_EMOJIS[Math.floor(random() * FLOWER_EMOJIS.length)];
-    const left = (random() * 100).toFixed(2);
-    const drift = (-36 + random() * 72).toFixed(2);
-    const rotate = (-22 + random() * 44).toFixed(2);
-    const baseSize = 1.6 + random() * 1.1;
-    const grownSize = baseSize + state.flowerSizeBoost + state.celebratePressCount * 0.04;
-    const size = grownSize.toFixed(2);
-    const duration = Math.round(3600 + random() * 2400);
-    const delay = Math.round(random() * 120);
-    const flower = document.createElement("span");
-
-    flower.className = "flower-emoji";
-    flower.textContent = emoji;
-    flower.style.setProperty("--left", `${left}%`);
-    flower.style.setProperty("--drift", `${drift}px`);
-    flower.style.setProperty("--rotate", `${rotate}deg`);
-    flower.style.setProperty("--size", `${size}rem`);
-    flower.style.setProperty("--duration", `${duration}ms`);
-    flower.style.setProperty("--delay", `${delay}ms`);
-    flower.addEventListener("animationend", () => {
-      flower.remove();
-    });
-    flowerStream.appendChild(flower);
-  };
-
-  const burstCount = Math.max(2, Math.round(state.flowerStreamIntensity) + 1);
+  const burstCount = Math.max(3, Math.round(state.flowerStreamIntensity) + 2);
   for (let index = 0; index < burstCount; index += 1) {
-    spawnFlower();
+    spawnFlowerParticle(true);
+  }
+}
+
+function ensureFlowerSystem(canvas) {
+  if (!state.flowerSystem) {
+    state.flowerSystem = {
+      canvas,
+      context: canvas.getContext("2d"),
+      particles: [],
+      rafId: 0,
+      lastFrameTime: 0,
+      spawnCarry: 0
+    };
+  } else {
+    state.flowerSystem.canvas = canvas;
   }
 
-  if (state.flowerStreamInterval) {
+  resizeFlowerCanvas();
+
+  if (!state.flowerResizeHandler) {
+    state.flowerResizeHandler = () => resizeFlowerCanvas();
+    window.addEventListener("resize", state.flowerResizeHandler, { passive: true });
+  }
+
+  if (!state.flowerSystem.rafId) {
+    state.flowerSystem.lastFrameTime = performance.now();
+    state.flowerSystem.rafId = requestAnimationFrame(runFlowerFrame);
+  }
+}
+
+function resizeFlowerCanvas() {
+  if (!state.flowerSystem?.canvas || !state.flowerSystem.context) {
     return;
   }
 
-  state.flowerStreamInterval = window.setInterval(() => {
-    const perTick = Math.max(1, Math.round(state.flowerStreamIntensity));
-    for (let index = 0; index < perTick; index += 1) {
-      spawnFlower();
+  const { canvas, context } = state.flowerSystem;
+  const dpr = window.devicePixelRatio || 1;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  context.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function runFlowerFrame(now) {
+  const system = state.flowerSystem;
+  if (!system?.context || !system.canvas) {
+    return;
+  }
+
+  const deltaMs = Math.min(now - system.lastFrameTime || 16, 32);
+  const deltaSeconds = deltaMs / 1000;
+  system.lastFrameTime = now;
+
+  updateFlowerParticles(deltaSeconds);
+  drawFlowerParticles();
+
+  system.rafId = requestAnimationFrame(runFlowerFrame);
+}
+
+function updateFlowerParticles(deltaSeconds) {
+  const system = state.flowerSystem;
+  if (!system) {
+    return;
+  }
+
+  const spawnRate = 0.9 + state.flowerStreamIntensity * 1.35;
+  system.spawnCarry += spawnRate * deltaSeconds;
+
+  const maxParticles = 90 + Math.round(state.flowerStreamIntensity * 18);
+  while (system.spawnCarry >= 1 && system.particles.length < maxParticles) {
+    spawnFlowerParticle(false);
+    system.spawnCarry -= 1;
+  }
+
+  system.particles = system.particles.filter((particle) => {
+    particle.age += deltaSeconds;
+    if (particle.age >= particle.life) {
+      return false;
     }
-  }, 180);
+
+    const progress = particle.age / particle.life;
+    particle.x = particle.startX + particle.driftX * progress;
+    particle.y = particle.startY - particle.travelY * progress;
+    particle.rotation = particle.rotationStart + particle.rotationDelta * progress;
+    particle.alpha = getFlowerAlpha(progress);
+    return true;
+  });
+}
+
+function drawFlowerParticles() {
+  const system = state.flowerSystem;
+  if (!system?.context || !system.canvas) {
+    return;
+  }
+
+  const { context, canvas, particles } = system;
+  context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  for (const particle of particles) {
+    context.save();
+    context.globalAlpha = particle.alpha;
+    context.translate(particle.x, particle.y);
+    context.rotate(particle.rotation);
+    context.font = `${particle.size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+    context.fillText(particle.emoji, 0, 0);
+    context.restore();
+  }
+}
+
+function spawnFlowerParticle(isBurst) {
+  const system = state.flowerSystem;
+  if (!system?.canvas) {
+    return;
+  }
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const overshootX = width * 0.12;
+  const random = particleRandom(Date.now() + system.particles.length * 17 + Math.floor(Math.random() * 9999));
+  const baseSize = 26 + random() * 18;
+  const size = baseSize + state.flowerSizeBoost * 18 + state.celebratePressCount * 1.2;
+  const life = (isBurst ? 4.2 : 4.6) + random() * 2.0;
+
+  system.particles.push({
+    emoji: FLOWER_EMOJIS[Math.floor(random() * FLOWER_EMOJIS.length)],
+    size,
+    age: 0,
+    life,
+    startX: -overshootX + random() * (width + overshootX * 2),
+    startY: height + size * (0.5 + random() * 0.8),
+    x: 0,
+    y: 0,
+    driftX: (-0.22 + random() * 0.44) * width,
+    travelY: height * (1.14 + random() * 0.28),
+    rotationStart: (-0.24 + random() * 0.48),
+    rotationDelta: (-0.65 + random() * 1.3),
+    rotation: 0,
+    alpha: 0
+  });
+}
+
+function getFlowerAlpha(progress) {
+  if (progress < 0.08) {
+    return progress / 0.08;
+  }
+
+  if (progress < 0.7) {
+    return 0.95 - (progress - 0.08) * 0.18;
+  }
+
+  const fadeProgress = (progress - 0.7) / 0.3;
+  return 0.84 * (1 - fadeProgress);
 }
 
 function transitionScreen(updateState, options = {}) {
@@ -599,11 +720,16 @@ function clearResultEffects() {
     state.revealFollowupTimeout = null;
   }
 
-  if (state.flowerStreamInterval) {
-    window.clearInterval(state.flowerStreamInterval);
-    state.flowerStreamInterval = null;
+  if (state.flowerSystem?.rafId) {
+    cancelAnimationFrame(state.flowerSystem.rafId);
   }
 
+  if (state.flowerResizeHandler) {
+    window.removeEventListener("resize", state.flowerResizeHandler);
+    state.flowerResizeHandler = null;
+  }
+
+  state.flowerSystem = null;
   state.flowerStreamIntensity = 0;
   state.celebratePressCount = 0;
   state.flowerSizeBoost = 0;
