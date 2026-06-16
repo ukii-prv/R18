@@ -143,7 +143,8 @@ function renderQuestion() {
   clearResultEffects();
   const question = state.content.questions[state.questionIndex];
   const total = state.content.questions.length;
-  const optionConfig = getOptionConfig(question.options);
+  const isInputQuestion = question.options.length === 1 && question.options[0].trim().toLowerCase() === "input";
+  const optionConfig = isInputQuestion ? { infinite: false, visibleOptions: [] } : getOptionConfig(question.options);
 
   teardownInfiniteOptions();
 
@@ -159,22 +160,62 @@ function renderQuestion() {
         <h2 class="question-title">${question.prompt}</h2>
         <p class="question-copy">${question.helper}</p>
       </div>
-      <div class="options${optionConfig.infinite ? " options-infinite" : ""}" id="options"></div>
+      <div class="options" id="options"></div>
     </section>
   `;
 
   const options = document.getElementById("options");
-  optionConfig.visibleOptions.forEach((option) => {
-    const button = document.createElement("button");
-    button.className = "option-button";
-    button.type = "button";
-    button.textContent = option;
-    button.addEventListener("click", () => handleAnswer(option, button));
-    options.appendChild(button);
-  });
 
-  if (optionConfig.infinite) {
-    setupInfiniteOptions(options, optionConfig.repeatOption);
+  if (isInputQuestion) {
+    const input = document.createElement("input");
+    input.className = "text-input question-text-input";
+    input.type = "text";
+    input.placeholder = "Hier Schreiben";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+
+    const submitButton = document.createElement("button");
+    submitButton.className = "primary-button";
+    submitButton.type = "button";
+    submitButton.textContent = "Weiter →";
+
+    const submitInput = () => {
+      if (state.transitioning) return;
+      const value = input.value.trim();
+      state.answers[state.questionIndex] = value;
+      const screen = app.querySelector(".screen");
+      transitionScreen(
+        () => {
+          if (state.questionIndex < state.content.questions.length - 1) {
+            state.questionIndex += 1;
+            return;
+          }
+          state.screen = "result";
+        },
+        { preDelay: 180, screen }
+      );
+    };
+
+    submitButton.addEventListener("click", submitInput);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitInput();
+    });
+
+    options.appendChild(input);
+    options.appendChild(submitButton);
+  } else {
+    optionConfig.visibleOptions.forEach((option) => {
+      const button = document.createElement("button");
+      button.className = "option-button";
+      button.type = "button";
+      button.textContent = option;
+      button.addEventListener("click", () => handleAnswer(option, button));
+      options.appendChild(button);
+    });
+
+    if (optionConfig.infinite) {
+      setupInfiniteOptions(options, optionConfig.repeatOption);
+    }
   }
 
   document.getElementById("back-button").addEventListener("click", () => {

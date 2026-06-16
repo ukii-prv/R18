@@ -7,7 +7,7 @@
   "welcome": {
     "eyebrow": "Sehr Sehr Sehr Sehr (Sehr!) Wichtiger Test",
     "title": "Passen wir gut zusammen? 💌",
-    "body": "Beantworte diese 10 Fragen und finde heraus, ob wir gut zusammenpassen. Beantworte sie so ehrlich wie möglich und mit Bedacht!",
+    "body": "Beantworte diese 15 Fragen und finde heraus, ob wir gut zusammenpassen. Beantworte sie so ehrlich wie möglich und mit Bedacht!",
     "button": "Ich bin bereit, GIB MIR DIE FRAGEN!"
   },
   "nameStep": {
@@ -75,6 +75,21 @@
       ]
     },
     {
+      "prompt": "Wer ist größer? 📏",
+      "helper": "Du darfst heute auch lügen",
+      "options": [
+        "Joel",
+        "Riana"
+      ]
+    },
+    {
+      "prompt": "Um wie viel größer denn? 😦",
+      "helper": "Locker 10 Meter",
+      "options": [
+          "input"
+      ]
+    },
+    {
       "prompt": "Schokolade oder Schokolade?",
       "helper": "Schoki?",
       "options": [
@@ -124,6 +139,32 @@
       ]
     },
     {
+      "prompt": "Wärst du lieber…",
+      "helper": "Also ich wär lieber Riana",
+      "options": [
+        "Profi Sängerin 💃",
+        "Profi Tänzerin 🎤️",
+        "Ich bin nicht 18!!!!!"
+      ]
+    },
+    {
+      "prompt": "Was ist dein Lieblingsessen? 🍽",
+      "helper": "Hoffentlich kann ich es Kochen",
+      "options": [
+          "input"
+      ]
+    },
+    {
+      "prompt": "Wie fandest du mein Geschenk??? 🎁",
+      "helper": "Du darfst ehrlich sein",
+      "options": [
+        "SUPER!",
+        "Gut",
+        "Naja",
+        "Kaka"
+      ]
+    },
+    {
       "prompt": "Wer ist dein Crush? 😳",
       "helper": "Letzte Frage, hier musst du aufpassen",
       "options": [
@@ -148,7 +189,7 @@
       "Paar mehr vielleicht?",
       "HALLO MEEEHRR!!!",
       "NICHT GENUG FÜR MICH!",
-      "MEHR, MEHR, MEHR, MEHR!",
+        "MEHR, MEHR, MEHR, MEHR!"
     ],
     "scoreLabel": "Match-Level",
     "body": "Wow, wir sind füreinander bestimmt! (auch wenn du 18 bist)"
